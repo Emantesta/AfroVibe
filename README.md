@@ -78,8 +78,6 @@ afrovibe-platform/
 
 Set Up Environment Variables:
 Create a .env file in the root and streaming-server/ directories:
-env
-
 # Root .env
 SONIC_RPC_URL=https://rpc.sonic.network
 IPFS_API_KEY=your-ipfs-key
@@ -90,44 +88,52 @@ GRAPHQL_ENDPOINT=http://localhost:4000/graphql
 STREAMING_PORT=8080
 
 Compile and Deploy Smart Contracts:
-bash
-
 cd contracts
 npx hardhat compile
 npx hardhat deploy --network sonic
 
 Run the Backend:
-bash
-
 cd backend
 npm run start
 
 Run the Streaming Server:
-bash
-
 cd streaming-server
 npm run start
 
 Run the Web Frontend:
-bash
-
 cd src
 npm run start
 
 Run the Mobile App:
-bash
-
 cd mobile
 npm run ios  # or npm run android
 
 Set Up AI Moderation:
-Install Python dependencies:
-bash
+  Install Python dependencies:
+    pip install -r requirements.txt
+  
+  Run the moderation script:
+    python recommendation.py
 
-pip install -r requirements.txt
+Usage
+Connect Wallet: Use MetaMask or another Web3 wallet to log in via UserProfile.sol.
 
-Run the moderation script:
-bash
+Create Content: Post, stream, or share to external platforms using CreatePost.js or PostCreation.js.
 
-python recommendation.py
+Monetize: Set up subscription tiers (Subscription.js), sell PPV content (PPVContent.js), or create AR filters (ARMarketplace.js).
 
+Engage: Earn points and badges (GamificationConfig.js), join communities (GroupChat.js), or vote on policies (Governance.js).
+
+Access Premium Content: Subscribe to creators or purchase PPV content, verifying eligibility if required (AgeVerification.js).
+
+Contact
+GitHub: Emantest/afrovibe-platform
+
+Email: support@afrovibe.io
+
+Community: Join our Discord or X community
+
+
+    
+
+  
