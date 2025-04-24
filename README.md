@@ -70,7 +70,6 @@ afrovibe-platform/
    cd afrovibe-platform
 
    Install Dependencies
-   
    npm install
    cd mobile && npm install
    cd ../backend && npm install
