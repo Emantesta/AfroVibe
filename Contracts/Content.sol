@@ -1,1 +1,1 @@
-// Manages posts, comments, live streams
+// Manages posts, comments, live streams; Restricted, PPV, queued content, music
