@@ -1,1 +1,1 @@
-// Community voting on platform features
+// Community voting on platform features; Platform-wide governance
