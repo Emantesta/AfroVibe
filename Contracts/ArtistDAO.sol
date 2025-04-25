@@ -1,1 +1,1 @@
-// Artist DAOs for fan engagement
+// Artist DAOs for fan engagement; DAO for artist governance
