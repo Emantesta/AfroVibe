@@ -1,1 +1,1 @@
-// Creator subscriptions for premium content
+// Creator subscriptions for premium content; USDC subscriptions, smart wallets
