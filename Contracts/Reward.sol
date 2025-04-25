@@ -1,1 +1,1 @@
-// Updated: Rewards for governance voting
+// Rewards for subscriptions, GameFi, music and governance voting
