@@ -1,1 +1,1 @@
-// Updated: Verification system, Web3 wallet integration
+// Smart wallet integration, user profiles, Verification system
