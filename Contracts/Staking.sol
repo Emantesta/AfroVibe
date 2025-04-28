@@ -1,1 +1,1 @@
-// 5% APY S token staking; Beets integration
+// 5% APY S token staking; Beets integration; dual rewards
