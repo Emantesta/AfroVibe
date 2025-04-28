@@ -25,7 +25,7 @@ AfroVibe is a Web3 social media platform built on the Sonic Blockchain, empoweri
   Afrovibe rewards, participate in validator delegation, bridge tokens cross-chain, and engage in governance. Built with OpenZeppelin's upgradeable contracts, 
   it supports ERC-4337 account abstraction, a multi-step upgrade process, and robust security features. The contract is designed for scalability, gas 
   efficiency, and flexibility in a decentralized staking ecosystem.
-- **Key Features**:
+- **Staking Key Features**:
 - **Staking and Unstaking**: Stake S tokens for 1–365 days, earn Afrovibe rewards (5% default APY), and unstake with penalties for early withdrawal (10% 
   default).
 - **Sonic Points**: Earn points (1 per 1e18 S tokens staked, max 1M) redeemable for fee discounts (1% per 1000 points) with a 1-year expiry.
