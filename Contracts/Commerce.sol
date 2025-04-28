@@ -1,1 +1,1 @@
-// Social commerce marketplace
+// Social commerce marketplace; 75-95% commerce sales
