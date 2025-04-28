@@ -1,1 +1,10 @@
 // GraphQL schema
+type Stake {
+  user: String!
+  sAmount: Float!
+  stSAmount: Float!
+  lockPeriod: Int!
+  beetsRewards: Float!
+  afrovibeRewards: Float!
+  votingPower: Float!
+}
