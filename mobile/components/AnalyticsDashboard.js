@@ -1,1 +1,1 @@
-// Analytics for subscriptions, commerce, music
+// Analytics for subscriptions, commerce, music; Displays Beets APR, AfroVibe APY
