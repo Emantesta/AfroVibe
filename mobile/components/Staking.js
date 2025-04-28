@@ -1,1 +1,1 @@
-// Beets staking UI
+// Beets staking UI; Staking UI with Beets rewards
