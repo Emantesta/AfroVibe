@@ -1,1 +1,1 @@
-// 8-90% brand deal share
+// 33.33-80% brand deal share
