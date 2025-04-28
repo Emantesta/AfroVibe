@@ -1,1 +1,1 @@
-// 5% APY S token staking
+// 5% APY S token staking; Beets integration
