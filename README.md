@@ -21,6 +21,49 @@ AfroVibe is a Web3 social media platform built on the Sonic Blockchain, empoweri
 - **Cross-Platform Sharing**: Post to X, Instagram, YouTube, TikTok, and LinkedIn.
 - **Accessibility**: Offline caching, text-to-speech, high-contrast themes, multilingual voice commands.
 - **Web3 Integration**: Wallet logins (MetaMask, Phantom, TrustWallet, Rabby) and NFT marketplaces.
+- **Staking contract**: The Staking contract is a secure, upgradeable smart contract optimized for the Sonic network, enabling users to stake S tokens, earn Afrovibe rewards, participate in validator delegation, bridge tokens cross-chain, and engage in governance. Built with OpenZeppelin's upgradeable contracts, it supports ERC-4337 account abstraction, a multi-step upgrade process, and robust security features. The contract is designed for scalability, gas efficiency, and flexibility in a decentralized staking ecosystem.
+Key Features
+Staking and Unstaking: Stake S tokens for 1–365 days, earn Afrovibe rewards (5% default APY), and unstake with penalties for early withdrawal (10% default).
+
+Sonic Points: Earn points (1 per 1e18 S tokens staked, max 1M) redeemable for fee discounts (1% per 1000 points) with a 1-year expiry.
+
+Validator Delegation: Delegate staked tokens to multiple Sonic validators with per-validator limits to earn additional rewards.
+
+Cross-Chain Bridging: Bridge S tokens to/from Ethereum via ISonicGateway with per-transaction and per-user limits.
+
+Governance: Participate in proposals with Merkle proof verification and voting power snapshots, decaying at 0.1% per day.
+
+Reward System: Claim Afrovibe, validator, and Beets rewards with a dynamic reserve threshold and 1-day claim cooldown.
+
+ERC-4337 Support: Gasless transactions via trusted paymasters with minimum reliability scores.
+
+Security: Uses ReentrancyGuard, Pausable, AccessControl, and a multi-step UUPS upgrade process with timelock.
+
+Gas Optimization: Cumulative reward index, packed Stake struct, and consolidated batch events reduce gas costs.
+
+Prerequisites
+Solidity Version: ^0.8.20
+
+Dependencies:
+OpenZeppelin Contracts Upgradeable (@openzeppelin/contracts-upgradeable@4.9.3)
+
+Hardhat or Foundry for development and testing
+
+Node.js and npm for package management
+
+Network: Deployable on Sonic network or Ethereum-compatible chains
+
+External Contracts:
+IBeetsStaking: For staking operations
+
+IGovernance: For proposal and voting
+
+ISonicGateway: For cross-chain bridging
+
+ISonicValidator: For validator delegation
+
+TimelockControllerUpgradeable: For governance timelocks
+
 
 ## Project Structure
 
