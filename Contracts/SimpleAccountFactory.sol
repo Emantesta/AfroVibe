@@ -1,1 +1,1 @@
-// New: Factory for smart contract wallets
+// Factory for smart contract wallets
