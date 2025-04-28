@@ -1,1 +1,1 @@
-// 8-90% premium subscription share
+// 25-90% premium subscription share
