@@ -1,1 +1,6 @@
 // Subgraph config
+eventHandlers:
+  - event: Staked(address,uint256,uint256)
+    handler: handleStaked
+  - event: TokensBridged(address,uint256)
+    handler: handleTokensBridged
