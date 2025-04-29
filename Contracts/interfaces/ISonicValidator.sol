@@ -1,3 +1,5 @@
+// Verify with Sonic’s validator contract documentation for additional methods.
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
