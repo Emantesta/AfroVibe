@@ -377,6 +377,11 @@ Using Sonic native USDC, a stablecoin pegged to the US dollar, ensures price sta
    - **Trust**: Stablecoin and DAOs build user confidence.
 
 ---
+## Testing
+To compile and test the Staking contract:
+```bash
+npx hardhat compile
+npx hardhat test
 
 ### Conclusion
 
