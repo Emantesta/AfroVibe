@@ -1,6 +1,43 @@
 // Subgraph config
-eventHandlers:
-  - event: Staked(address,uint256,uint256)
-    handler: handleStaked
-  - event: TokensBridged(address,uint256)
-    handler: handleTokensBridged
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Staking
+    network: sonic
+    source:
+      address: "<STAKING_CONTRACT_ADDRESS>"
+      abi: Staking
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Stake
+        - Unstake
+        - RewardClaim
+        - SonicPointRedemption
+        - BridgedToken
+        - Delegated
+        - Proposal
+      abis:
+        - name: Staking
+          file: ../artifacts/contracts/Staking.sol/Staking.json
+      eventHandlers:
+        - event: Staked(address,uint256,uint256)
+          handler: handleStaked
+        - event: Unstaked(address,uint256,uint256)
+          handler: handleUnstaked
+        - event: RewardsClaimed(address,uint256)
+          handler: handleRewardsClaimed
+        - event: SonicPointsRedeemed(address,uint256)
+          handler: handleSonicPointsRedeemed
+        - event: TokensBridged(address,uint256)
+          handler: handleTokensBridged
+        - event: ValidatorDelegated(address,address,uint256)
+          handler: handleValidatorDelegated
+        - event: ProposalCreated(uint256,bytes32)
+          handler: handleProposalCreated
+      file: ./src/mapping.ts
