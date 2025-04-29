@@ -377,6 +377,21 @@ Using Sonic native USDC, a stablecoin pegged to the US dollar, ensures price sta
    - **Trust**: Stablecoin and DAOs build user confidence.
 
 ---
+## AfroVibe Project
+
+### Mobile Components
+- **Staking.js**: Handles staking, unstaking, reward claiming, token bridging, validator delegation, and proposal creation. Uses ethers.js to interact with `Staking.sol`.
+- **AnalyticsDashboard.js**: Displays user data (Sonic Points, staked amounts, delegated amounts) using on-chain and subgraph data.
+
+### Backend Components
+- **subgraph.yaml, schema.graphql, mapping.ts**: Indexes `Staking.sol` events (Staked, Unstaked, etc.) for querying by the mobile app.
+- **rewardCalculator.js**: Calculates off-chain rewards based on stakes and Sonic Points.
+
+### Setup
+1. Install dependencies:
+   ```bash
+   npm install ethers graphql-request graphql react-native
+   
 ## Testing
 To compile and test the Staking contract:
 ```bash
