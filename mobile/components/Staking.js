@@ -1,4 +1,4 @@
-// Beets staking UI; Staking UI with Beets rewards
+// Beets staking UI; Staking UI with Beets reward
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator, TouchableOpacity, Linking, Switch } from 'react-native';
 import { ethers } from 'ethers';
@@ -49,6 +49,11 @@ const Staking = () => {
   const [toEthereum, setToEthereum] = useState(false);
   const [validator, setValidator] = useState('');
   const [descriptionHash, setDescriptionHash] = useState('');
+  const [merkleRoot, setMerkleRoot] = useState('');
+  const [snapshotTimestamp, setSnapshotTimestamp] = useState('');
+  const [proposalId, setProposalId] = useState('');
+  const [merkleProof, setMerkleProof] = useState('');
+  const [newImplementation, setNewImplementation] = useState('');
   const [sonicPoints, setSonicPoints] = useState('0');
   const [stakedAmount, setStakedAmount] = useState('0');
   /** @type {[Array<{index: number, amount: string, lockPeriod: string, endTime: string}>, React.Dispatch<React.SetStateAction<Array<{index: number, amount: string, lockPeriod: string, endTime: string}>>>]} */
@@ -111,6 +116,11 @@ const Staking = () => {
     setRecipient('');
     setValidator('');
     setDescriptionHash('');
+    setMerkleRoot('');
+    setSnapshotTimestamp('');
+    setProposalId('');
+    setMerkleProof('');
+    setNewImplementation('');
     setTxHash('');
   };
 
@@ -127,6 +137,12 @@ const Staking = () => {
       return 'Stake lock period has not yet expired';
     } else if (error.reason?.includes('invalid stake index')) {
       return 'Invalid stake index provided';
+    } else if (error.reason?.includes('invalid merkle proof')) {
+      return 'Invalid Merkle proof provided';
+    } else if (error.reason?.includes('invalid proposal id')) {
+      return 'Invalid proposal ID provided';
+    } else if (error.reason?.includes('invalid implementation')) {
+      return 'Invalid new implementation address';
     }
     return error.reason || error.message || 'An unexpected error occurred';
   };
@@ -174,7 +190,7 @@ const Staking = () => {
   // Verify contract method availability
   const verifyContractMethods = async (contract) => {
     try {
-      const requiredMethods = ['sonicPoints', 'stakeCount', 'stakes'];
+      const requiredMethods = ['sonicPoints', 'stakeCount', 'stakes', 'verifyProposalVoter', 'proposeUpgrade', 'confirmUpgrade'];
       for (const method of requiredMethods) {
         if (typeof contract[method] !== 'function') {
           throw new Error(`Contract method ${method} is not available`);
@@ -575,11 +591,19 @@ const Staking = () => {
       Alert.alert('Error', 'Please enter a valid description hash');
       return;
     }
+    if (!merkleRoot || !ethers.utils.isHexString(merkleRoot, 32)) {
+      Alert.alert('Error', 'Please enter a valid Merkle root (32 bytes hex)');
+      return;
+    }
+    if (!snapshotTimestamp || isNaN(snapshotTimestamp) || parseInt(snapshotTimestamp) <= 0) {
+      Alert.alert('Error', 'Please enter a valid snapshot timestamp');
+      return;
+    }
     setIsLoading(true);
     try {
       const feeData = await provider.getFeeData();
-      const gasEstimate = await contract.estimateGas.createProposal(ethers.utils.id(descriptionHash));
-      const tx = await contract.createProposal(ethers.utils.id(descriptionHash), {
+      const gasEstimate = await contract.estimateGas.createProposal(ethers.utils.id(descriptionHash), merkleRoot, parseInt(snapshotTimestamp));
+      const tx = await contract.createProposal(ethers.utils.id(descriptionHash), merkleRoot, parseInt(snapshotTimestamp), {
         gasLimit: gasEstimate.mul(120).div(100),
         maxFeePerGas: feeData.maxFeePerGas,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
@@ -591,6 +615,108 @@ const Staking = () => {
       resetInputs();
     } catch (error) {
       console.error('Proposal error:', error);
+      Alert.alert('Error', getFriendlyErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Verify voter eligibility for a proposal
+   */
+  const verifyProposalVoter = async () => {
+    if (!proposalId || isNaN(proposalId) || parseInt(proposalId) < 0) {
+      Alert.alert('Error', 'Please enter a valid proposal ID');
+      return;
+    }
+    if (!merkleProof) {
+      Alert.alert('Error', 'Please enter a valid Merkle proof');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const proofArray = merkleProof.split(',').map(item => item.trim()).filter(item => ethers.utils.isHexString(item));
+      if (proofArray.length === 0) {
+        throw new Error('Invalid Merkle proof format');
+      }
+      const feeData = await provider.getFeeData();
+      const gasEstimate = await contract.estimateGas.verifyProposalVoter(parseInt(proposalId), proofArray);
+      const tx = await contract.verifyProposalVoter(parseInt(proposalId), proofArray, {
+        gasLimit: gasEstimate.mul(120).div(100),
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+      });
+      addTransaction(tx.hash, 'Verify Voter');
+      await tx.wait();
+      setTxHash(tx.hash);
+      Alert.alert('Success', `Voter verified for proposal ${proposalId}\nTx: ${truncateAddress(tx.hash)}`);
+      resetInputs();
+    } catch (error) {
+      console.error('Verify voter error:', error);
+      Alert.alert('Error', getFriendlyErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Propose a contract upgrade
+   */
+  const proposeUpgrade = async () => {
+    if (!newImplementation || !isValidAddress(newImplementation)) {
+      Alert.alert('Error', 'Please enter a valid new implementation address');
+      return;
+    }
+    if (!descriptionHash) {
+      Alert.alert('Error', 'Please enter a valid description hash');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const feeData = await provider.getFeeData();
+      const gasEstimate = await contract.estimateGas.proposeUpgrade(newImplementation, ethers.utils.id(descriptionHash));
+      const tx = await contract.proposeUpgrade(newImplementation, ethers.utils.id(descriptionHash), {
+        gasLimit: gasEstimate.mul(120).div(100),
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+      });
+      addTransaction(tx.hash, 'Propose Upgrade');
+      await tx.wait();
+      setTxHash(tx.hash);
+      Alert.alert('Success', `Upgrade proposed\nTx: ${truncateAddress(tx.hash)}`);
+      resetInputs();
+    } catch (error) {
+      console.error('Propose upgrade error:', error);
+      Alert.alert('Error', getFriendlyErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Confirm a proposed upgrade
+   */
+  const confirmUpgrade = async () => {
+    if (!proposalId || isNaN(proposalId) || parseInt(proposalId) < 0) {
+      Alert.alert('Error', 'Please enter a valid proposal ID');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const feeData = await provider.getFeeData();
+      const gasEstimate = await contract.estimateGas.confirmUpgrade(parseInt(proposalId));
+      const tx = await contract.confirmUpgrade(parseInt(proposalId), {
+        gasLimit: gasEstimate.mul(120).div(100),
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+      });
+      addTransaction(tx.hash, 'Confirm Upgrade');
+      await tx.wait();
+      setTxHash(tx.hash);
+      Alert.alert('Success', `Upgrade confirmed for proposal ${proposalId}\nTx: ${truncateAddress(tx.hash)}`);
+      resetInputs();
+    } catch (error) {
+      console.error('Confirm upgrade error:', error);
       Alert.alert('Error', getFriendlyErrorMessage(error));
     } finally {
       setIsLoading(false);
@@ -634,9 +760,30 @@ const Staking = () => {
   };
 
   const confirmProposal = () => {
-    Alert.alert('Confirm Proposal', `Create proposal with description hash ${descriptionHash}?`, [
+    Alert.alert('Confirm Proposal', `Create proposal with description hash ${descriptionHash}, Merkle root ${truncateAddress(merkleRoot)}, and snapshot ${snapshotTimestamp}?`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Confirm', onPress: createProposal },
+    ]);
+  };
+
+  const confirmVerifyVoter = () => {
+    Alert.alert('Confirm Verify Voter', `Verify voter for proposal ${proposalId} with Merkle proof?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Confirm', onPress: verifyProposalVoter },
+    ]);
+  };
+
+  const confirmProposeUpgrade = () => {
+    Alert.alert('Confirm Propose Upgrade', `Propose upgrade to ${truncateAddress(newImplementation)} with description hash ${descriptionHash}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Confirm', onPress: proposeUpgrade },
+    ]);
+  };
+
+  const confirmConfirmUpgrade = () => {
+    Alert.alert('Confirm Upgrade', `Confirm upgrade for proposal ${proposalId}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Confirm', onPress: confirmUpgrade },
     ]);
   };
 
@@ -647,6 +794,9 @@ const Staking = () => {
   const debouncedBridge = debounce(confirmBridge);
   const debouncedDelegate = debounce(confirmDelegate);
   const debouncedProposal = debounce(confirmProposal);
+  const debouncedVerifyVoter = debounce(confirmVerifyVoter);
+  const debouncedProposeUpgrade = debounce(confirmProposeUpgrade);
+  const debouncedConfirmUpgrade = debounce(confirmConfirmUpgrade);
 
   // Dynamic styles based on theme
   const styles = StyleSheet.create({
@@ -1029,13 +1179,122 @@ const Staking = () => {
             accessibilityHint="Enter the description hash for the governance proposal"
             placeholderTextColor={isDarkMode ? '#bbbbbb' : '#757575'}
           />
+          <TextInput
+            style={styles.input}
+            placeholder="Merkle Root"
+            value={merkleRoot}
+            onChangeText={setMerkleRoot}
+            editable={!isLoading}
+            accessibilityLabel="Merkle Root Input"
+            accessibilityHint="Enter the Merkle root for the proposal"
+            placeholderTextColor={isDarkMode ? '#bbbbbb' : '#757575'}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Snapshot Timestamp"
+            value={snapshotTimestamp}
+            onChangeText={setSnapshotTimestamp}
+            keyboardType="numeric"
+            editable={!isLoading}
+            accessibilityLabel="Snapshot Timestamp Input"
+            accessibilityHint="Enter the snapshot timestamp for the proposal"
+            placeholderTextColor={isDarkMode ? '#bbbbbb' : '#757575'}
+          />
           <Button
             title="Create Proposal"
             onPress={debouncedProposal}
             disabled={isLoading || !isWalletConnected}
             color={isDarkMode ? '#bbdefb' : '#1a73e8'}
             accessibilityLabel="Create Proposal"
-            accessibilityHint="Create a governance proposal with the specified description hash"
+            accessibilityHint="Create a governance proposal with the specified details"
+          />
+
+          <Text style={styles.section} accessibilityLabel="Verify Proposal Voter Section">
+            Verify Proposal Voter
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Proposal ID"
+            value={proposalId}
+            onChangeText={setProposalId}
+            keyboardType="numeric"
+            editable={!isLoading}
+            accessibilityLabel="Proposal ID Input"
+            accessibilityHint="Enter the proposal ID to verify voter eligibility"
+            placeholderTextColor={isDarkMode ? '#bbbbbb' : '#757575'}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Merkle Proof (comma-separated)"
+            value={merkleProof}
+            onChangeText={setMerkleProof}
+            editable={!isLoading}
+            accessibilityLabel="Merkle Proof Input"
+            accessibilityHint="Enter the comma-separated Merkle proof for voter verification"
+            placeholderTextColor={isDarkMode ? '#bbbbbb' : '#757575'}
+          />
+          <Button
+            title="Verify Voter"
+            onPress={debouncedVerifyVoter}
+            disabled={isLoading || !isWalletConnected}
+            color={isDarkMode ? '#bbdefb' : '#1a73e8'}
+            accessibilityLabel="Verify Voter"
+            accessibilityHint="Verify voter eligibility for the specified proposal"
+          />
+
+          <Text style={styles.section} accessibilityLabel="Propose Upgrade Section">
+            Propose Upgrade
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="New Implementation Address"
+            value={newImplementation}
+            onChangeText={setNewImplementation}
+            editable={!isLoading}
+            accessibilityLabel="New Implementation Address Input"
+            accessibilityHint="Enter the new implementation contract address"
+            placeholderTextColor={isDarkMode ? '#bbbbbb' : '#757575'}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Description Hash"
+            value={descriptionHash}
+            onChangeText={setDescriptionHash}
+            editable={!isLoading}
+            accessibilityLabel="Description Hash Input"
+            accessibilityHint="Enter the description hash for the upgrade proposal"
+            placeholderTextColor={isDarkMode ? '#bbbbbb' : '#757575'}
+          />
+          <Button
+            title="Propose Upgrade"
+            onPress={debouncedProposeUpgrade}
+            disabled={isLoading || !isWalletConnected}
+            color={isDarkMode ? '#bbdefb' : '#1a73e8'}
+            accessibilityLabel="Propose Upgrade"
+            accessibilityHint="Propose a contract upgrade with the specified details"
+          />
+
+          <Text style={styles.section} accessibilityLabel="Confirm Upgrade Section">
+            Confirm Upgrade
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Proposal ID"
+            value={proposalId}
+            onChangeText={setProposalId}
+            keyboardType="numeric"
+            editable={!isLoading}
+            accessibilityLabel="Proposal ID Input"
+            accessibilityHint="Enter the proposal ID to confirm the upgrade"
+            placeholderTextColor={isDarkMode ? '#bbbbbb' : '#757575'}
+          />
+          <Button
+            title="Confirm Upgrade"
+            onPress={debouncedConfirmUpgrade}
+            disabled={isLoading || !isWalletConnected}
+            color={isDarkMode ? '#bbdefb' : '#1a73e8'}
+            accessibilityLabel="Confirm Upgrade"
+            accessibilityHint="Confirm the upgrade for the specified proposal"
           />
         </>
       )}
