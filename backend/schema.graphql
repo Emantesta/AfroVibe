@@ -8,3 +8,55 @@ type Stake {
   afrovibeRewards: Float!
   votingPower: Float!
 }
+
+type Stake @entity {
+  id: ID!
+  user: Bytes!
+  amount: BigInt!
+  lockPeriod: BigInt!
+  timestamp: BigInt!
+}
+
+type Unstake @entity {
+  id: ID!
+  user: Bytes!
+  amount: BigInt!
+  penalty: BigInt!
+  timestamp: BigInt!
+}
+
+type RewardClaim @entity {
+  id: ID!
+  user: Bytes!
+  amount: BigInt!
+  timestamp: BigInt!
+}
+
+type SonicPointRedemption @entity {
+  id: ID!
+  user: Bytes!
+  points: BigInt!
+  timestamp: BigInt!
+}
+
+type BridgedToken @entity {
+  id: ID!
+  user: Bytes!
+  amount: BigInt!
+  timestamp: BigInt!
+}
+
+type Delegated @entity {
+  id: ID!
+  user: Bytes!
+  validator: Bytes!
+  amount: BigInt!
+  timestamp: BigInt!
+}
+
+type Proposal @entity {
+  id: ID!
+  proposalId: BigInt!
+  descriptionHash: Bytes!
+  timestamp: BigInt!
+}
