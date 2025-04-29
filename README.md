@@ -383,6 +383,13 @@ To compile and test the Staking contract:
 npx hardhat compile
 npx hardhat test
 
+Tests cover:
+Staking and unstaking with Sonic Points
+Reward claiming
+Cross-chain bridging
+Validator delegation
+Governance proposals
+
 ### Conclusion
 
 The directory structure integrates all game-changing features—music streaming, DAOs, offline sync, social commerce, local payments, cultural hubs, AI personalization, and GameFi—using Sonic native USDC for stable transactions. The README.md reflects these additions, providing a clear roadmap for developers and users. This architecture leverages Sonic’s scalability, ensures cultural relevance, and addresses Nigeria’s unique challenges, positioning AfroVibe as a leading Web3 social platform.
