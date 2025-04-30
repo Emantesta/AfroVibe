@@ -1,1 +1,10 @@
 // Node.js deps
+"scripts": {
+  "test": "jest"
+},
+"jest": {
+  "testMatch": [
+    "<rootDir>/src/components/__tests__/**/*.test.js",
+    "<rootDir>/mobile/components/__tests__/**/*.test.js"
+  ]
+}
