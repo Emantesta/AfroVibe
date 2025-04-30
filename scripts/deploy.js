@@ -2,6 +2,17 @@ async function main() {
   const Staking = await ethers.getContractFactory("Staking");
   const staking = await upgrades.deployProxy(Staking, [
     process.env.S_TOKEN_ADDRESS,
+    process.env.
+    process.env.
+    process.env.
+    process.env.
+    process.env.
+    process.env.
+    process.env.
+    process.env.
+    process.env.
+    process.env.
+    process.env.
     process.env.BEETS_STAKING_ADDRESS,
     process.env.GOVERNANCE_ADDRESS,
     process.env.PLATFORM_DAO_ADDRESS,
