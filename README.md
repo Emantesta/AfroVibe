@@ -21,6 +21,14 @@ AfroVibe is a Web3 social media platform built on the Sonic Blockchain, empoweri
 - **Cross-Platform Sharing**: Post to X, Instagram, YouTube, TikTok, and LinkedIn.
 - **Accessibility**: Offline caching, text-to-speech, high-contrast themes, multilingual voice commands.
 - **Web3 Integration**: Wallet logins (MetaMask, Phantom, TrustWallet, Rabby) and NFT marketplaces.
+
+## External Contracts
+- **IBeetsStaking**: Manages staking operations (see `contracts/interfaces/IBeetsStaking.sol`).
+- **IGovernance**: Handles proposals and voting (OpenZeppelin or custom).
+- **ISonicGateway**: Enables cross-chain bridging (custom for Sonic).
+- **ISonicValidator**: Manages validator delegation (custom for Sonic).
+- **TimelockControllerUpgradeable**: Enforces governance timelocks (OpenZeppelin). 
+
 - **Staking contract**: The Staking contract is a secure, upgradeable smart contract optimized for the Sonic network, enabling users to stake S tokens, earn 
   Afrovibe rewards, participate in validator delegation, bridge tokens cross-chain, and engage in governance. Built with OpenZeppelin's upgradeable contracts, 
   it supports ERC-4337 account abstraction, a multi-step upgrade process, and robust security features. The contract is designed for scalability, gas 
