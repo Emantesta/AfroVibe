@@ -132,4 +132,24 @@ describe("Staking", () => {
       .to.emit(staking, "ProposalCreated")
       .withArgs(1, descriptionHash);
   });
+
+  it("should verify proposal voter", async () => {
+  const merkleRoot = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("test"));
+  const leaf = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["address"], [user.address]));
+  const proof = []; // Simplified for test
+  await staking.connect(dao).createProposal(ethers.utils.id("test"), merkleRoot, 0);
+  await expect(staking.connect(user).verifyProposalVoter(1, proof))
+    .to.emit(staking, "ProposalVerified")
+    .withArgs(1, user.address, leaf);
+});
+
+it("should propose and confirm upgrade", async () => {
+  const newImplementation = ethers.Wallet.createRandom().address;
+  await expect(staking.connect(dao).proposeUpgrade(newImplementation, ethers.utils.id("upgrade")))
+    .to.emit(staking, "UpgradeProposalCreated");
+  await ethers.provider.send("evm_increaseTime", [86400]); // Simulate timelock
+  await staking.connect(dao).confirmUpgrade(1);
+  const proposal = await staking.upgradeProposals(1);
+  expect(proposal.validated).to.be.true;
+});
 });
