@@ -37,6 +37,21 @@ AfroVibe is a Web3 social media platform built on the Sonic Blockchain, empoweri
 - **Security**: Uses ReentrancyGuard, Pausable, AccessControl, and a multi-step UUPS upgrade process with timelock.
 - **Gas Optimization**: Cumulative reward index, packed Stake struct, and consolidated batch events reduce gas costs.
 
+- **Staking.sol**: Supports staking, Sonic Points, bridging, delegation, governance, and upgrades using `TimelockControllerUpgradeable` and `MerkleProof`.
+
+### Mobile Components
+- **Staking.js**: Handles all contract interactions, including voter verification (`verifyProposalVoter`) and upgrade proposals (`proposeUpgrade`, `confirmUpgrade`).
+- **AnalyticsDashboard.js**: Displays stakes, delegations, proposals, and upgrade proposals with timelock status.
+
+### Backend Components
+- **subgraph.yaml, schema.graphql, mapping.ts**: Indexes all events, including `ProposalVerified` and `UpgradeProposalCreated`.
+- **rewardCalculator.js**: Calculates rewards and tracks governance participation.
+
+### Setup
+1. Install dependencies:
+   ```bash
+   npm install ethers graphql-request graphql react-native @openzeppelin/contracts@4.9.3 @openzeppelin/contracts-upgradeable@4.9.3
+
 - **Prerequisites**
 - Solidity Version: ^0.8.20
 - **Dependencies**:
