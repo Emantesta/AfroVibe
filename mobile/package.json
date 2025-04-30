@@ -1,1 +1,9 @@
-// Dependencies
+"scripts": {
+  "test": "jest"
+},
+"jest": {
+  "preset": "react-native",
+  "transformIgnorePatterns": [
+    "node_modules/(?!(@react-native|react-native|react-native-dotenv|react-native-reanimated|react-native-vector-icons|@react-native-firebase|@react-native-async-storage)/)"
+  ]
+}
