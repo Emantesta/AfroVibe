@@ -1,4 +1,3 @@
-// Node.js deps
 "scripts": {
   "test": "jest"
 },
