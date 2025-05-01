@@ -39,6 +39,27 @@ type SonicPointRedemption @entity {
   timestamp: BigInt!
 }
 
+type RevenueShared {
+  creator: String!
+  amount: BigInt!
+  stream: String!
+}
+type ReferralReward {
+  referrer: String!
+  amount: BigInt!
+  creator: String!
+}
+type StakingReward {
+  user: String!
+  amount: BigInt!
+  apy: Float!
+}
+type EngagementReward {
+  user: String!
+  amount: BigInt!
+  action: String!
+}
+
 type BridgedToken @entity {
   id: ID!
   user: Bytes!
