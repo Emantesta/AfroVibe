@@ -71,3 +71,22 @@ type Subsidy {
   amount: Float! # S token subsidies
   recipient: String!
 }
+
+type CulturalHub {
+  id: String!
+  ethnicGroup: String!
+  members: Int!
+  revenue: BigInt!
+}
+type MusicStream {
+  artist: String!
+  track: String!
+  revenue: BigInt!
+  nftId: String
+}
+type VirtualEvent {
+  id: String!
+  creator: String!
+  attendees: Int!
+  revenue: BigInt!
+}
