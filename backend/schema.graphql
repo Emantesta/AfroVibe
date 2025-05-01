@@ -90,3 +90,14 @@ type VirtualEvent {
   attendees: Int!
   revenue: BigInt!
 }
+
+type BrandPartnership {
+  brand: String!
+  creator: String!
+  amount: BigInt!
+}
+type PremiumSubscription {
+  user: String!
+  amount: BigInt!
+  tier: String!
+}
