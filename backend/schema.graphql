@@ -60,3 +60,14 @@ type Proposal @entity {
   descriptionHash: Bytes!
   timestamp: BigInt!
 }
+
+type RevenueShare {
+  creator: String!
+  amount: Float! # In millions
+  stream: String!
+  sharePercentage: Float! # 8-90%
+}
+type Subsidy {
+  amount: Float! # S token subsidies
+  recipient: String!
+}
