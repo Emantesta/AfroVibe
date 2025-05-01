@@ -13,6 +13,11 @@ module.exports = {
       chainId: 1337,
       gas: 12000000,
       blockGasLimit: 12000000
-    }
-  }
-};
+    },
+    paths: {
+    sources: "./contracts",
+    tests: "./tests",
+    cache: "./cache",
+    artifacts: "./artifacts"
+   } 
+ };
