@@ -1,3 +1,32 @@
+{
+  "name": "afrovibe",
+  "version": "1.0.0",
+  "dependencies": {
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@openzeppelin/contracts": "^4.9.3",
+    "@onramp.money/onramp-web-sdk": "^1.0.0",
+    "@biconomy/account": "^3.0.0", // ERC-4337 SDK
+    "@balancer-labs/sdk": "^1.0.0",
+    "dotenv": "^16.0.3",
+    "ethers": "^5.7.2",
+    "graphql": "^16.6.0",
+    "node-fetch": "^2.6.7",
+    "react-native": "^0.71.0",
+    "react-native-share": "^8.0.0",
+    "react-native-unity-webgl": "^2.0.0",
+    "webrtc-adapter": "^8.1.1"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0"
+  },
+  "scripts": {
+    "start": "react-native start",
+    "test": "mocha tests/",
+    "deploy": "npx hardhat run scripts/deploy.js --network sonic"
+  }
+}
+
 "scripts": {
   "test": "jest"
 },
