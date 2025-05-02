@@ -1,4 +1,9 @@
 // Virtual events and ticket sales; 30-90% event ticket sales
+// Host virtual concerts, cultural festivals, and networking events in a metaverse-like environment (Metaverse.js),
+// with USDC ticket sales (Event.sol) and NFT collectibles.
+// Users attend via mobile AR/VR or 2D interfaces,
+// celebrating Afrobeats, Nollywood, or ethnic festivals (e.g., Durbar).
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
