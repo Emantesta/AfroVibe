@@ -40,6 +40,59 @@ AfroVibe is a Web3 social media platform built on the Sonic Blockchain, empoweri
 - **Low-bandwidth streaming**: (`StreamView.js`).
 - **Privacy Controls**: Post/profile/message privacy (`PrivacySettings.sol`).
 - 
+### Key Components
+
+- **Smart Contracts** (`contracts/`):
+  - `UserProfile.sol`: Profiles, Web3 logins, smart wallet setup.
+  - `Content.sol`: Posts, streams, restricted, PPV, music, queued content.
+  - `Subscription.sol`: Creator subscriptions with USDC payments.
+  - `Commerce.sol`: Social commerce marketplace.
+  - `MusicStreaming.sol`: Decentralized music streaming and NFT releases.
+  - `GameFi.sol`: Play-to-earn mini-games.
+  - `ArtistDAO.sol`: Artist-led DAOs for fan engagement.
+  - `PlatformDAO.sol`: Platform-wide user governance.
+  - `SimpleAccountFactory.sol`: Factory for smart contract wallets.
+  - `SimpleAccount.sol`: Smart wallet implementation.
+  - `Paymaster.sol`: Gas sponsorship with S tokens.
+  - `AgeVerification.sol`: Self-attestation for restricted content.
+  - `Marketplace.sol`: PPV, tipping, commerce, USDC payments.
+
+- **Frontend** (`src/components/`, `mobile/components/`):
+  - `Subscription.js`: Manage subscriptions.
+  - `MusicStreaming.js`: Stream music, buy NFT tracks.
+  - `Commerce.js`: Shoppable posts and checkout.
+  - `GameFi.js`: Mini-games for USDC rewards.
+  - `OfflineSync.js`: Offline content creation and caching.
+  - `CulturalHub.js`: Cultural community hubs.
+  - `ArtistDAO.js`: Artist DAO participation.
+  - `PlatformDAO.js`: Platform DAO voting.
+  - `MobilePayment.js`: Fiat-to-USDC payments.
+  - `Profile.js`: Smart wallet setup and management.
+
+- **Backend** (`backend/`):
+  - GraphQL server and subgraph for blockchain events.
+
+- **AI Moderation** (`recommendation.py`):
+  - NSFW detection, personalized music and commerce recommendations.
+
+## Prerequisites
+
+- **Node.js** (>= 16.x)
+- **Python** (>= 3.8) for `recommendation.py`
+- **Hardhat** or **Foundry** for smart contracts
+- **IPFS** and **Arweave** nodes or APIs
+- **Sonic Blockchain** testnet/mainnet access
+- **MetaMask** or compatible Web3 wallet
+- **Fiat-to-Crypto On-Ramp APIs** (e.g., MoonPay, Transak, Flutterwave)
+- **S Token Contract** for Paymaster funding
+
+## Installation
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/your-org/afrovibe-platform.git
+   cd afrovibe-platform
+- 
 ---
 
 ### Benefits for AfroVibe
