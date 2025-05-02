@@ -1,4 +1,8 @@
 // Crowdfunding for creators/projects; 60-95% crowdfunding funds
+// A decentralized crowdfunding platform (Crowdfunding.sol) allowing creators and cultural hubs to raise USDC for projects,
+// (e.g., music albums, community events, startups), with backers receiving NFTs or exclusive perks. 
+// Users can pledge USDC, and funds are released upon milestones, governed by smart contracts.
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
