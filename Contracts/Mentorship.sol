@@ -1,4 +1,7 @@
 // Skill-sharing marketplace; 40-90% mentorship fees
+// A marketplace (Mentorship.sol) where creators offer paid mentorship sessions 
+// or skill-sharing courses (e.g., music production, fashion design) in USDC, with AI-driven matching (recommendation.py). 
+// Users book sessions or buy courses, earning certifications as NFTs.
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
