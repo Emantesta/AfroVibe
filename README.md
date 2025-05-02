@@ -8,24 +8,37 @@ AfroVibe is a Web3 social media platform built on the Sonic Blockchain, empoweri
 - **Decentralized Music Streaming**: Artists upload tracks, earn USDC per stream, and release NFT-based limited editions, celebrating Nigeria’s Afrobeats culture.
 - **Social Commerce Marketplace**: Sell products through shoppable posts and profiles, with USDC payments and fiat-to-crypto on-ramps for accessibility.
 - **GameFi Rewards**: Earn USDC and NFTs through play-to-earn mini-games, like AR scavenger hunts and cultural quizzes.
+- **Fan Clubs**: AI-driven fan experiences with USDC subscriptions (`FanClub.sol`).
 - **Offline-First Sync**: Create and consume content offline, syncing when connected, ideal for Nigeria’s connectivity challenges.
 - **Cultural Hubs**: Join communities celebrating Nigeria’s ethnic diversity (e.g., Yoruba, Igbo) and global diaspora, with curated feeds and events.
+- **Virtual Events**: Metaverse concerts with USDC tickets (`Event.sol`).
 - **Artist DAOs**: Fans join artist-led DAOs to fund projects and vote on decisions, fostering engagement.
 - **Platform DAO**: Users vote on platform policies, reinforcing Web3 ownership.
-- **Local Payments**: Buy USDC using mobile money (e.g., MTN MoMo, Flutterwave), inclusive for unbanked users.
-- **AI Personalization**: Tailored feeds and music recommendations via AI, with robust content moderation.
-- **Music Streaming**: 90% of revenue (`MusicStreaming.sol`).
+- **Local Payments**: Buy USDC using mobile money (e.g., MTN MoMo, Flutterwave), inclusive for unbanked users; Fiat-to-USDC via Onramper (MTN MoMo, Flutterwave) (`MobilePayment.js`).
+- **AI Personalization**: Tailored feeds and music recommendations via AI, with robust content moderation; NSFW, music, commerce, fan club recommendations (`recommendation.py`).
+- **Music Streaming**: 8-90% of revenue (`MusicStreaming.sol`).
+- **Age Verification**: Self-attestation for restricted content (`AgeVerification.sol`).
 - **Gamification**: Earn points, badges, and USDC rewards for engagement.
+- **Frontend**: React Native (`mobile/`), feature-phone optimized.
+- **Backend**: GraphQL (`schema.graphql`), Node.js (`backend/server.js`).
+- **AI**: Python-based recommendations (`recommendation.py`).
+- **Mentorship Marketplace**: Skill-sharing with USDC payments (`Mentorship.sol`).
+- **Streaming**: Low-latency server for events (`streaming-server/`).
+- **P2P Payments**: USDC remittances and transfers (`Payments.sol`).
+- **Blockchain**: Sonic Blockchain (10,000 TPS, EVM-compatible).
 - **Engagement Rewards**: USDC for likes/comments (`Reward.sol`).
+- **Voice Interaction**: Multilingual voice commands (`VoiceInteraction.js`).
 - **Referrals**: 10% of referred creators’ revenue (`ReferralProgram.sol`).
 - **Curation**: USDC bounties for trending posts (`Reward.sol`).
 - **AR Filters**: Create and sell AI-generated augmented reality filters as NFTs.
 - **Decentralized Ads**: Opt-in ads with USDC revenue sharing.
+- **Crowdfunding**: USDC funding for creators/projects (`Crowdfunding.sol`).
 - **Private Messaging**: End-to-end encrypted chats and paid content requests.
 - **Cross-Platform Sharing**: Post to X, Instagram, YouTube, TikTok, and LinkedIn.
 - **Accessibility**: Offline caching, text-to-speech, high-contrast themes, multilingual voice commands.
 - **Web3 Integration**: Wallet logins (MetaMask, Phantom, TrustWallet, Rabby) and NFT marketplaces.
-- Low-bandwidth streaming (`StreamView.js`).
+- **Low-bandwidth streaming**: (`StreamView.js`).
+- **Privacy Controls**: Post/profile/message privacy (`PrivacySettings.sol`).
 
 ## External Contracts
 - **IBeetsStaking**: Manages staking operations (see `contracts/interfaces/IBeetsStaking.sol`).
