@@ -1,4 +1,6 @@
 // AI-driven fan clubs; 30-90% fan club fees
+// AI-powered fan clubs (FanClub.sol) where fans join creator-led communities for exclusive content, live Q&As, and virtual meet-and-greets, paying USDC subscriptions. AI (recommendation.py) curates personalized fan experiences, and top fans earn “Superfan” NFTs with perks (e.g., backstage access).
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
