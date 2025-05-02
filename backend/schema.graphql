@@ -122,3 +122,29 @@ type PremiumSubscription {
   amount: BigInt!
   tier: String!
 }
+
+type CampaignCreated {
+  campaignId: ID!
+  creator: String!
+  goal: BigInt!
+}
+type TicketPurchased {
+  eventId: ID!
+  buyer: String!
+  nftId: BigInt!
+}
+type SessionBooked {
+  sessionId: ID!
+  mentee: String!
+  price: BigInt!
+}
+type PaymentSent {
+  sender: String!
+  receiver: String!
+  amount: BigInt!
+}
+type JoinedClub {
+  clubId: ID!
+  fan: String!
+  fee: BigInt!
+}
