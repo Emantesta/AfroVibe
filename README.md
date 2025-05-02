@@ -14,13 +14,18 @@ AfroVibe is a Web3 social media platform built on the Sonic Blockchain, empoweri
 - **Platform DAO**: Users vote on platform policies, reinforcing Web3 ownership.
 - **Local Payments**: Buy USDC using mobile money (e.g., MTN MoMo, Flutterwave), inclusive for unbanked users.
 - **AI Personalization**: Tailored feeds and music recommendations via AI, with robust content moderation.
+- **Music Streaming**: 90% of revenue (`MusicStreaming.sol`).
 - **Gamification**: Earn points, badges, and USDC rewards for engagement.
+- **Engagement Rewards**: USDC for likes/comments (`Reward.sol`).
+- **Referrals**: 10% of referred creators’ revenue (`ReferralProgram.sol`).
+- **Curation**: USDC bounties for trending posts (`Reward.sol`).
 - **AR Filters**: Create and sell AI-generated augmented reality filters as NFTs.
 - **Decentralized Ads**: Opt-in ads with USDC revenue sharing.
 - **Private Messaging**: End-to-end encrypted chats and paid content requests.
 - **Cross-Platform Sharing**: Post to X, Instagram, YouTube, TikTok, and LinkedIn.
 - **Accessibility**: Offline caching, text-to-speech, high-contrast themes, multilingual voice commands.
 - **Web3 Integration**: Wallet logins (MetaMask, Phantom, TrustWallet, Rabby) and NFT marketplaces.
+- Low-bandwidth streaming (`StreamView.js`).
 
 ## External Contracts
 - **IBeetsStaking**: Manages staking operations (see `contracts/interfaces/IBeetsStaking.sol`).
