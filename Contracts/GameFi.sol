@@ -1,6 +1,6 @@
 // Play-to-earn mini-games; 33.33-80% in-game rewards
 // Users earn Sonic native USDC, a stablecoin pegged to the US dollar, for completing game tasks (e.g., finding AR collectibles, answering quiz questions).
-Users receive non-fungible tokens (NFTs) via NFT.sol, representing unique in-game items (e.g., AR filter designs, virtual Afrobeats concert tickets, or collectible avatars).
+// Users receive non-fungible tokens (NFTs) via NFT.sol, representing unique in-game items (e.g., AR filter designs, virtual Afrobeats concert tickets, or collectible avatars).
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
