@@ -479,6 +479,21 @@ Using Sonic native USDC, a stablecoin pegged to the US dollar, ensures price sta
 - **Nigeria**: A user buys USDC with MTN MoMo via `MobilePayment.js`, pays 500 NGN (~$0.30) for 0.30 USDC, and subscribes to a creator for 0.10 USDC/month. The stablecoin ensures predictable costs.
 - **Global**: Users in the US or EU buy USDC with credit cards or PayPal, using the same on-ramp, and engage in music streaming or GameFi, benefiting from low Sonic transaction fees.
 
+- Usage
+Create Smart Wallet: Sign up via Profile.js, and a smart wallet is created using SimpleAccountFactory.sol.
+
+Acquire USDC: Buy Sonic native USDC with mobile money via MobilePayment.js.
+
+Create Content: Post, stream, or sell products using CreatePost.js, MusicStreaming.js, Commerce.js.
+
+Monetize: Set up subscriptions (Subscription.js), PPV (PPVContent.js), music NFTs (MusicStreaming.js), or sell AR filters (ARMarketplace.js).
+
+Engage: Earn USDC via GameFi (GameFi.js), join cultural hubs (CulturalHub.js), participate in DAOs (ArtistDAO.js, PlatformDAO.js), or vote (Governance.js).
+
+Gasless Transactions: Perform USDC transactions with gas sponsored in S tokens via Paymaster.sol.
+
+Offline Access: Draft posts or view feeds offline (OfflineSync.js).
+
 ---
 
 ### Benefits for Adoption
