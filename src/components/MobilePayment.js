@@ -13,6 +13,12 @@ const buyUSDC = async (amount, paymentMethod) => {
     cryptoAsset: 'USDC',
     chain: 'Sonic'
   });
+  
+  function subsidizeOnRampFee(address user, uint256 fee) external onlyOwner {
+  require(isNewUser(user), "Not a new user");
+  IERC20(usdc).transfer(user, fee);
+  emit FeeSubsidized(user, fee);
+}
   const { fee, provider } = await onramper.getBestProvider();
   if (fee && isNewUser(userAddress)) {
     await subsidizeFee(userAddress, fee); // Refund $0.70 for new users
