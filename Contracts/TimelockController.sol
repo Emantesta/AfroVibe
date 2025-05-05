@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
- * @title TimelockController 
+ * @title TimelockController
  * @dev A contract that delays execution of governance operations to ensure transparency and security.
- * Authorized proposers can schedule operations, which can be executed by executors after a minimum delay.
- * Supports batch operations and predecessor dependencies.
+ * Authorized proposers can schedule operations, which can be executed by a multi-sig executor after a minimum delay.
+ * Supports batch operations, predecessor dependencies, and upgradeability via UUPS proxy.
  */
-contract TimelockController is AccessControl {
+contract TimelockController is Initializable, UUPSUpgradeable, AccessControlUpgradeable {
     // Roles for governance
     bytes32 public constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
     bytes32 public constant EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");
@@ -35,11 +37,14 @@ contract TimelockController is AccessControl {
     }
 
     // Minimum and maximum delay for operations
-    uint256 public immutable minDelay;
+    uint256 public minDelay;
     uint256 public constant MAX_DELAY = 30 days;
 
     // Mapping of operation ID to operation details
     mapping(bytes32 => Operation) private _operations;
+
+    // Multi-sig address for executor role
+    address public immutable multiSigExecutor;
 
     // Events
     event OperationScheduled(
@@ -58,26 +63,39 @@ contract TimelockController is AccessControl {
     event CallSalt(bytes32 indexed id, bytes32 salt);
 
     /**
-     * @dev Constructor to initialize the timelock with roles and delay.
+     * @dev Constructor to set the multi-sig executor and disable initialization.
+     * @param _multiSigExecutor The address of the multi-sig wallet (e.g., Gnosis Safe) for execution.
+     */
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor(address _multiSigExecutor) {
+        require(_multiSigExecutor != address(0), "Invalid multi-sig executor");
+        multiSigExecutor = _multiSigExecutor;
+        _disableInitializers();
+    }
+
+    /**
+     * @dev Initializer for the UUPS proxy.
      * @param _minDelay Minimum delay for operations (e.g., 2 days).
      * @param _proposers List of addresses allowed to propose operations.
-     * @param _executors List of addresses allowed to execute operations (use 0x0 for anyone).
      * @param _admin Initial admin address (can be revoked after setup).
      */
-    constructor(
+    function initialize(
         uint256 _minDelay,
         address[] memory _proposers,
-        address[] memory _executors,
         address _admin
-    ) {
+    ) public initializer {
         require(_minDelay <= MAX_DELAY, "Delay exceeds maximum");
         require(_admin != address(0), "Invalid admin");
+
+        __AccessControl_init();
+        __UUPSUpgradeable_init();
 
         minDelay = _minDelay;
 
         // Set up roles
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(ADMIN_ROLE, _admin);
+        _grantRole(EXECUTOR_ROLE, multiSigExecutor); // Restrict to multi-sig
 
         // Initialize proposers
         for (uint256 i = 0; i < _proposers.length; ) {
@@ -85,27 +103,18 @@ contract TimelockController is AccessControl {
             _grantRole(PROPOSER_ROLE, _proposers[i]);
             unchecked { i++; }
         }
-
-        // Initialize executors (0x0 means anyone can execute)
-        if (_executors.length == 0) {
-            _grantRole(EXECUTOR_ROLE, address(0));
-        } else {
-            for (uint256 i = 0; i < _executors.length; ) {
-                require(_executors[i] != address(0), "Invalid executor");
-                _grantRole(EXECUTOR_ROLE, _executors[i]);
-                unchecked { i++; }
-            }
-        }
     }
 
     /**
-     * @dev Modifier to check if the caller is an authorized executor.
+     * @dev Restrict upgrades to ADMIN_ROLE.
+     */
+    function _authorizeUpgrade(address) internal override onlyRole(ADMIN_ROLE) {}
+
+    /**
+     * @dev Modifier to check if the caller is the multi-sig executor.
      */
     modifier onlyExecutor() {
-        require(
-            hasRole(EXECUTOR_ROLE, msg.sender) || hasRole(EXECUTOR_ROLE, address(0)),
-            "Caller is not an executor"
-        );
+        require(hasRole(EXECUTOR_ROLE, msg.sender), "Caller is not the executor");
         _;
     }
 
@@ -215,7 +224,7 @@ contract TimelockController is AccessControl {
         }
 
         _operations[id] = Operation({
-            target: address(0), // Not used for batch
+            target: address(0),
             value: 0,
             data: abi.encode(targets, values, datas),
             predecessor: predecessor,
@@ -310,8 +319,7 @@ contract TimelockController is AccessControl {
     function updateMinDelay(uint256 newDelay) external onlyRole(ADMIN_ROLE) {
         require(newDelay <= MAX_DELAY, "Delay exceeds maximum");
         emit MinDelayUpdated(minDelay, newDelay);
-        // Note: minDelay is immutable, so this requires a new deployment or proxy upgrade
-        // Alternatively, store as a mutable variable if updates are needed
+        minDelay = newDelay;
     }
 
     /**
@@ -344,4 +352,3 @@ contract TimelockController is AccessControl {
      * @dev Allows the contract to receive ETH for operations with value.
      */
     receive() external payable {}
-}
