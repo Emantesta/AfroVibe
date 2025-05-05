@@ -1,4 +1,3 @@
-// Gas sponsorship for USDC transactions
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -8,6 +7,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Interface for Chainlink Keeper
 interface IKeeperCompatible {
@@ -18,6 +18,18 @@ interface IKeeperCompatible {
 // Interface for PaymasterFunder
 interface IPaymasterFunder {
     function fund(uint256 amount) external;
+}
+
+// Interface for TimelockController
+interface ITimelockController {
+    function schedule(
+        address target,
+        uint256 value,
+        bytes calldata data,
+        bytes32 predecessor,
+        bytes32 salt,
+        uint256 delay
+    ) external;
 }
 
 contract AfroVibePaymaster is
@@ -38,9 +50,9 @@ contract AfroVibePaymaster is
     address public immutable timelock; // Timelock for governance
     address public immutable funder; // PaymasterFunder for deposit automation
     bytes32 public immutable simpleAccountCodeHash;
-    uint256 public maxGasCost;
-    uint256 public minDepositThreshold;
-    uint256 public totalGasSponsored;
+    uint256 public maxGasCost; // Max S tokens to sponsor per operation
+    uint256 public minDepositThreshold; // Min S token balance for Upkeep
+    uint256 public totalGasSponsored; // Total S tokens sponsored
     bool public paused;
     uint256 public lastUpkeepTimestamp;
     uint256 public constant TIMELOCK_DELAY = 2 days;
@@ -48,21 +60,20 @@ contract AfroVibePaymaster is
     uint256 public constant MAX_PARTIAL_SPONSORSHIP = 50; // Max 50% user-paid gas
 
     // Whitelists
-    mapping(address => bool) public validTargets;
-    mapping(bytes32 => bool) public validActionTypes;
-    mapping(address => bool) public authorizedFunders;
+    mapping(address => bool) public validTargets; // Valid contract targets
+    mapping(bytes32 => bool) public validActionTypes; // Valid action types (e.g., POST, LIKE)
+    mapping(address => bool) public authorizedFunders; // Authorized S token funders
+    mapping(address => bool) public validTokens; // Valid ERC-20 tokens (e.g., wETH, USDC)
+    mapping(bytes4 => bool) public validSelectors; // Valid function selectors
 
     // Pending updates for timelock
     struct PendingUpdate {
-        address target;
-        bytes32 actionType;
-        bool isAdd;
-        uint256 timestamp;
+        address target; // Target address or token
+        bytes32 actionType; // Action type or selector
+        bool isAdd; // Add or remove
+        uint256 timestamp; // When proposed
     }
     mapping(bytes32 => PendingUpdate) public pendingUpdates;
-
-    // Valid function selectors (e.g., for POST, LIKE, TIP)
-    mapping(bytes4 => bool) public validSelectors;
 
     // Events
     event GasSponsored(
@@ -72,13 +83,17 @@ contract AfroVibePaymaster is
         address indexed target,
         bytes32 actionType
     );
-    event DepositFunded(address indexed funder, uint256 amount);
+    event DepositFunded(address indexed funder, uint256 amount); // S token deposits
+    event TokenDepositFunded(address indexed funder, address indexed token, uint256 amount); // ERC-20 deposits
     event LowDeposit(uint256 balance, uint256 threshold);
     event ValidationFailed(string reason, address sender, bytes32 actionType, address target);
     event TargetUpdateProposed(bytes32 indexed updateId, address target, bool isAdd, uint256 timestamp);
     event ActionTypeUpdateProposed(bytes32 indexed updateId, bytes32 actionType, bool isAdd, uint256 timestamp);
+    event TokenUpdateProposed(bytes32 indexed updateId, address token, bool isAdd, uint256 timestamp);
+    event SelectorUpdateProposed(bytes32 indexed updateId, bytes4 selector, bool isAdd, uint256 timestamp);
     event TargetUpdated(address indexed target, bool isAdd);
     event ActionTypeUpdated(bytes32 indexed actionType, bool isAdd);
+    event TokenUpdated(address indexed token, bool isAdd);
     event SelectorUpdated(bytes4 indexed selector, bool isAdd);
     event MaxGasCostUpdated(uint256 oldMaxGasCost, uint256 newMaxGasCost);
     event MinDepositThresholdUpdated(uint256 oldThreshold, uint256 newThreshold);
@@ -87,6 +102,7 @@ contract AfroVibePaymaster is
     event Paused(address indexed admin);
     event Unpaused(address indexed admin);
     event EmergencyWithdraw(address indexed recipient, uint256 amount);
+    event EmergencyTokenWithdraw(address indexed recipient, address indexed token, uint256 amount);
 
     // Interface for SimpleAccountFactory
     interface ISimpleAccountFactory {
@@ -120,6 +136,7 @@ contract AfroVibePaymaster is
         uint256 _minDepositThreshold,
         bytes32[] memory _validActionTypes,
         bytes4[] memory _validSelectors,
+        address[] memory _validTokens,
         address[] memory _authorizedFunders,
         address _defaultAdmin
     ) public initializer {
@@ -164,6 +181,14 @@ contract AfroVibePaymaster is
             unchecked { i++; }
         }
 
+        // Initialize valid tokens (e.g., wETH, USDC)
+        for (uint256 i = 0; i < _validTokens.length; ) {
+            require(_validTokens[i] != address(0), "Invalid token");
+            validTokens[_validTokens[i]] = true;
+            emit TokenUpdated(_validTokens[i], true);
+            unchecked { i++; }
+        }
+
         // Initialize authorized funders
         authorizedFunders[funder] = true;
         emit AuthorizedFunderAdded(funder);
@@ -184,7 +209,7 @@ contract AfroVibePaymaster is
         _;
     }
 
-    // Deposit ETH to EntryPoint
+    // Deposit S tokens (Sonic native currency)
     function deposit() external payable {
         require(authorizedFunders[msg.sender], "Unauthorized funder");
         require(msg.value > 0, "Invalid deposit amount");
@@ -192,13 +217,31 @@ contract AfroVibePaymaster is
         emit DepositFunded(msg.sender, msg.value);
     }
 
-    // Emergency withdraw to recover funds
+    // Deposit ERC-20 tokens (e.g., wETH, USDC)
+    function depositToken(address token, uint256 amount) external {
+        require(authorizedFunders[msg.sender], "Unauthorized funder");
+        require(validTokens[token], "Invalid token");
+        require(amount > 0, "Invalid amount");
+        IERC20(token).transferFrom(msg.sender, address(this), amount);
+        emit TokenDepositFunded(msg.sender, token, amount);
+    }
+
+    // Emergency withdraw S tokens
     function emergencyWithdraw(address payable to, uint256 amount) external onlyRole(ADMIN_ROLE) {
         require(to != address(0), "Invalid recipient");
-        require(amount <= address(this).balance, "Insufficient balance");
-        (bool success, ) = to.call{value: amount}("");
+        require(amount <= address(this).balance, "Insufficient S token balance");
+        (bool success,) = to.call{value: amount}("");
         require(success, "Withdraw failed");
         emit EmergencyWithdraw(to, amount);
+    }
+
+    // Emergency withdraw ERC-20 tokens
+    function emergencyTokenWithdraw(address to, address token, uint256 amount) external onlyRole(ADMIN_ROLE) {
+        require(to != address(0), "Invalid recipient");
+        require(validTokens[token], "Invalid token");
+        require(amount <= IERC20(token).balanceOf(address(this)), "Insufficient token balance");
+        IERC20(token).transfer(to, amount);
+        emit EmergencyTokenWithdraw(to, token, amount);
     }
 
     // Propose adding/removing a valid target
@@ -214,7 +257,7 @@ contract AfroVibePaymaster is
         emit TargetUpdateProposed(updateId, target, isAdd, block.timestamp);
 
         // Schedule via Timelock
-        (bool success, ) = timelock.call(
+        (bool success,) = timelock.call(
             abi.encodeCall(
                 ITimelockController.schedule,
                 (address(this), 0, abi.encodeCall(this.executeTargetUpdate, (updateId, target, isAdd)), bytes32(0), updateId, TIMELOCK_DELAY)
@@ -248,7 +291,7 @@ contract AfroVibePaymaster is
         emit ActionTypeUpdateProposed(updateId, actionType, isAdd, block.timestamp);
 
         // Schedule via Timelock
-        (bool success, ) = timelock.call(
+        (bool success,) = timelock.call(
             abi.encodeCall(
                 ITimelockController.schedule,
                 (address(this), 0, abi.encodeCall(this.executeActionTypeUpdate, (updateId, actionType, isAdd)), bytes32(0), updateId, TIMELOCK_DELAY)
@@ -275,14 +318,14 @@ contract AfroVibePaymaster is
         bytes32 updateId = keccak256(abi.encode(selector, isAdd, block.timestamp));
         pendingUpdates[updateId] = PendingUpdate({
             target: address(0),
-            actionType: selector,
+            actionType: bytes32(selector),
             isAdd: isAdd,
             timestamp: block.timestamp
         });
-        emit SelectorUpdated(selector, isAdd);
+        emit SelectorUpdateProposed(updateId, selector, isAdd, block.timestamp);
 
         // Schedule via Timelock
-        (bool success, ) = timelock.call(
+        (bool success,) = timelock.call(
             abi.encodeCall(
                 ITimelockController.schedule,
                 (address(this), 0, abi.encodeCall(this.executeSelectorUpdate, (updateId, selector, isAdd)), bytes32(0), updateId, TIMELOCK_DELAY)
@@ -299,7 +342,41 @@ contract AfroVibePaymaster is
         require(block.timestamp >= update.timestamp + TIMELOCK_DELAY, "Timelock not elapsed");
 
         validSelectors[selector] = isAdd;
-        emit SelectorUpdated(selector, violin isAdd);
+        emit SelectorUpdated(selector, isAdd);
+        delete pendingUpdates[updateId];
+    }
+
+    // Propose adding/removing a valid ERC-20 token
+    function proposeTokenUpdate(address token, bool isAdd) external onlyRole(ADMIN_ROLE) {
+        require(token != address(0), "Invalid token");
+        bytes32 updateId = keccak256(abi.encode(token, isAdd, block.timestamp));
+        pendingUpdates[updateId] = PendingUpdate({
+            target: token,
+            actionType: bytes32(0),
+            isAdd: isAdd,
+            timestamp: block.timestamp
+        });
+        emit TokenUpdateProposed(updateId, token, isAdd, block.timestamp);
+
+        // Schedule via Timelock
+        (bool success,) = timelock.call(
+            abi.encodeCall(
+                ITimelockController.schedule,
+                (address(this), 0, abi.encodeCall(this.executeTokenUpdate, (updateId, token, isAdd)), bytes32(0), updateId, TIMELOCK_DELAY)
+            )
+        );
+        require(success, "Timelock scheduling failed");
+    }
+
+    // Execute token update
+    function executeTokenUpdate(bytes32 updateId, address token, bool isAdd) external {
+        require(msg.sender == timelock, "Only timelock");
+        PendingUpdate memory update = pendingUpdates[updateId];
+        require(update.target == token && update.isAdd == isAdd, "Invalid update");
+        require(block.timestamp >= update.timestamp + TIMELOCK_DELAY, "Timelock not elapsed");
+
+        validTokens[token] = isAdd;
+        emit TokenUpdated(token, isAdd);
         delete pendingUpdates[updateId];
     }
 
@@ -330,7 +407,7 @@ contract AfroVibePaymaster is
 
     // Propose pause
     function proposePause() external onlyRole(PAUSER_ROLE) {
-        (bool success, ) = timelock.call(
+        (bool success,) = timelock.call(
             abi.encodeCall(
                 ITimelockController.schedule,
                 (address(this), 0, abi.encodeCall(this.pause, ()), bytes32(0), keccak256(abi.encode("pause", block.timestamp)), TIMELOCK_DELAY)
@@ -354,7 +431,7 @@ contract AfroVibePaymaster is
         emit Paused(msg.sender);
     }
 
-    // Chainlink Keeper: Check deposit
+    // Chainlink Keeper: Check S token deposit
     function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory performData) {
         uint256 balance = entryPoint.balanceOf(address(this));
         upkeepNeeded = balance < minDepositThreshold && block.timestamp >= lastUpkeepTimestamp + MIN_UPKEEP_INTERVAL;
@@ -362,13 +439,13 @@ contract AfroVibePaymaster is
         return (upkeepNeeded, performData);
     }
 
-    // Chainlink Keeper: Replenish deposit
+    // Chainlink Keeper: Replenish S token deposit
     function performUpkeep(bytes calldata performData) external override {
         require(block.timestamp >= lastUpkeepTimestamp + MIN_UPKEEP_INTERVAL, "Upkeep too frequent");
         uint256 balance = abi.decode(performData, (uint256));
         require(balance < minDepositThreshold, "Deposit sufficient");
         uint256 amount = minDepositThreshold - balance;
-        IPaymasterFunder(funder).fund(amount);
+        IPaymasterFunder(funder).fund(amount); // Fund S tokens
         lastUpkeepTimestamp = block.timestamp;
         emit DepositFunded(funder, amount);
     }
@@ -430,29 +507,26 @@ contract AfroVibePaymaster is
             return (bytes(0), 1);
         }
 
-        // Gas cost calculation
+        // Gas cost calculation (in S tokens)
         uint256 sponsorCost = maxCost;
         if (maxCost > maxGasCost) {
             sponsorCost = maxGasCost;
             uint256 userCost = maxCost - sponsorCost;
-            require(
-                userCost <= (maxCost * MAX_PARTIAL_SPONSORSHIP) / 100,
-                "User cost exceeds partial sponsorship limit"
-            );
+            require(userCost <= (maxCost * MAX_PARTIAL_SPONSORSHIP) / 100, "User cost exceeds partial sponsorship limit");
             require(
                 userOp.preVerificationGas + userOp.verificationGas + userOp.callGas >= userCost,
                 "Insufficient user gas"
             );
         }
 
-        // Check deposit
+        // Check S token deposit
         uint256 deposit = entryPoint.balanceOf(address(this));
         if (deposit < Math.max(sponsorCost, minDepositThreshold)) {
             emit LowDeposit(deposit, minDepositThreshold);
             return (bytes(0), 1);
         }
 
-        context = abi.encode(userOp.sender, userOp.nonce, actionType, target);
+        context = abi.encode(userOp.sender, userOp.nonce, actionType, target, sponsorCost);
         validationData = 0;
     }
 
@@ -463,9 +537,9 @@ contract AfroVibePaymaster is
         uint256 actualGasCost
     ) external override nonReentrant {
         require(msg.sender == address(entryPoint), "Only EntryPoint");
-        (address sender, uint256 nonce, bytes32 actionType, address target) = abi.decode(
+        (address sender, uint256 nonce, bytes32 actionType, address target,) = abi.decode(
             context,
-            (address, uint256, bytes32, address)
+            (address, uint256, bytes32, address, uint256)
         );
 
         if (mode == PostOpMode.opReverted) {
@@ -489,7 +563,7 @@ contract AfroVibePaymaster is
         }
     }
 
-    // Receive ETH
+    // Receive S tokens
     receive() external payable {
         if (msg.value > 0) {
             require(authorizedFunders[msg.sender], "Unauthorized funder");
@@ -497,16 +571,4 @@ contract AfroVibePaymaster is
             emit DepositFunded(msg.sender, msg.value);
         }
     }
-}
-
-// TimelockController interface for scheduling
-interface ITimelockController {
-    function schedule(
-        address target,
-        uint256 value,
-        bytes calldata data,
-        bytes32 predecessor,
-        bytes32 salt,
-        uint256 delay
-    ) external;
 }
