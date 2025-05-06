@@ -31,8 +31,6 @@ AfroVibe is a Web3 social media platform built on the Sonic Blockchain, empoweri
 - **Referrals**: 10% of referred creators’ revenue (`ReferralProgram.sol`).
 - **Curation**: USDC bounties for trending posts (`Reward.sol`).
 - **AR Filters**: Create and sell AI-generated augmented reality filters as NFTs.
-- ## EntryPoint Contract
-The AfroVibePaymaster uses the ERC-4337 EntryPoint contract. Check [Sonic Documentation](https://docs.soniclabs.com) for the official address. If unavailable, deploy using `scripts/deployEntryPoint.js`.
 - **Decentralized Ads**: Opt-in ads with USDC revenue sharing.
 - **Crowdfunding**: USDC funding for creators/projects (`Crowdfunding.sol`).
 - **Private Messaging**: End-to-end encrypted chats and paid content requests.
@@ -76,6 +74,8 @@ The AfroVibePaymaster uses the ERC-4337 EntryPoint contract. Check [Sonic Docume
 
 - **AI Moderation** (`recommendation.py`):
   - NSFW detection, personalized music and commerce recommendations.
+  - ## EntryPoint Contract
+The AfroVibePaymaster uses the ERC-4337 EntryPoint contract. Check [Sonic Documentation](https://docs.soniclabs.com) for the official address. If unavailable, deploy using `scripts/deployEntryPoint.js`.
 
 ## Prerequisites
 
