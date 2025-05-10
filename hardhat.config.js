@@ -22,5 +22,17 @@ module.exports = {
     tests: "./tests",
     cache: "./cache",
     artifacts: "./artifacts"
-   } 
+   },
+   etherscan: {
+   apiKey: process.env.SONICSCAN_API_KEY || "",
+   customChains: [
+    {
+      network: "sonic",
+      chainId: parseInt(process.env.SONIC_CHAIN_ID) || 64165,
+      urls: {
+        apiURL: "https://api.sonicscan.org/api",
+        browserURL: "https://sonicscan.org",
+      },
+    },
+  ],
  };
