@@ -1,0 +1,7 @@
+// Store network-specific or auxiliary configurations (e.g., Sonic network details).
+{
+  "rpcUrl": "https://rpc.testnet.soniclabs.com",
+  "chainId": 64165,
+  "entryPoint": "0xYourEntryPointAddress",
+  "sonicGateway": "0xYourSonicGatewayAddress"
+}
