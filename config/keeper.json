@@ -1,0 +1,9 @@
+// Chainlink Keepers configuration.
+{
+  "registryAddress": "0xYourKeeperRegistryAddress",
+  "linkTokenAddress": "0xYourLinkTokenAddress",
+  "upkeepId": "YourUpkeepId",
+  "gasLimit": 500000
+}
+
+
