@@ -35,12 +35,37 @@ async function deployPaymaster() {
       throw new Error("One or more required environment variables are missing. Check your .env file.");
     }
 
-    // Log the deployer's address
+    // Validate Ethereum addresses
+    const isValidAddress = (address) => ethers.utils.isAddress(address);
+    const addressVars = [
+      entryPoint,
+      simpleAccountFactory,
+      timelock,
+      funder,
+      dexAddress,
+      stakingAddress,
+      wethAddress,
+      usdcAddress,
+      otherFunderAddress,
+      defaultAdmin,
+    ];
+    if (addressVars.some((addr) => !isValidAddress(addr))) {
+      throw new Error("One or more environment variables contain invalid Ethereum addresses.");
+    }
+
+    // Validate code hash format
+    if (!ethers.utils.isHexString(simpleAccountCodeHash, 32)) {
+      throw new Error("SIMPLE_ACCOUNT_CODE_HASH must be a valid 32-byte hex string.");
+    }
+
+    // Log the deployer's address and balance
     const [deployer] = await ethers.getSigners();
+    const balance = await ethers.provider.getBalance(deployer.address);
     console.log("Deploying contracts with account:", deployer.address);
+    console.log("Deployer balance:", ethers.utils.formatEther(balance), "S tokens");
 
     // Deploy the Paymaster implementation contract
-    console.log("Deploying Paymaster implementation...");
+    console.log("Deploying AfroVibePaymaster implementation...");
     const Paymaster = await ethers.getContractFactory("AfroVibePaymaster");
     const paymasterImpl = await Paymaster.deploy(
       entryPoint,
@@ -50,7 +75,7 @@ async function deployPaymaster() {
       funder
     );
     await paymasterImpl.deployed();
-    console.log("Paymaster implementation deployed at:", paymasterImpl.address);
+    console.log("AfroVibePaymaster implementation deployed at:", paymasterImpl.address);
 
     // Configuration for the proxy initialization
     const validTargets = [dexAddress, stakingAddress];
@@ -66,7 +91,7 @@ async function deployPaymaster() {
     const admin = defaultAdmin;
 
     // Deploy the Paymaster proxy contract
-    console.log("Deploying Paymaster proxy...");
+    console.log("Deploying AfroVibePaymaster proxy...");
     const paymasterProxy = await upgrades.deployProxy(
       Paymaster,
       [
@@ -79,10 +104,13 @@ async function deployPaymaster() {
         authorizedFunders,
         admin,
       ],
-      { initializer: "initialize" } // Removed unsafeAllow for safety
+      {
+        initializer: "initialize",
+        unsafeAllow: ["constructor"], // Required due to contract's constructor
+      }
     );
     await paymasterProxy.deployed();
-    console.log("Paymaster proxy deployed at:", paymasterProxy.address);
+    console.log("AfroVibePaymaster proxy deployed at:", paymasterProxy.address);
 
     // Log completion
     console.log("Deployment completed successfully!");
@@ -97,6 +125,6 @@ async function deployPaymaster() {
 deployPaymaster()
   .then(() => process.exit(0))
   .catch((error) => {
-    console.error(error);
+    console.error("Deployment failed:", error);
     process.exit(1);
   });
