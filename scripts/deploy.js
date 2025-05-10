@@ -62,6 +62,7 @@ async function main() {
 
   // Deploy AfroVibePaymaster
   const AfroVibePaymaster = await ethers.getContractFactory("AfroVibePaymaster");
+  const entryPoint = process.env.ENTRY_POINT_ADDRESS;
   console.log("Deploying AfroVibePaymaster implementation...");
   const paymasterImpl = await AfroVibePaymaster.deploy(
     entryPoint,
