@@ -7,10 +7,19 @@ require("dotenv").config();
 
 module.exports = {
   solidity: "0.8.20",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
   networks: {
     sonic: {
       url: process.env.SONIC_RPC_URL || "https://rpc.sonic.network",
-      accounts: [process.env.PRIVATE_KEY]
+      chainId: parseInt(process.env.SONIC_CHAIN_ID) || 64165,  
+      accounts: [process.env.PRIVATE_KEY],
+      gasPrice: "auto"  
     },
     hardhat: {
       chainId: 1337,
@@ -30,9 +39,13 @@ module.exports = {
       network: "sonic",
       chainId: parseInt(process.env.SONIC_CHAIN_ID) || 64165,
       urls: {
-        apiURL: "https://api.sonicscan.org/api",
-        browserURL: "https://sonicscan.org",
+      apiURL: "https://api.sonicscan.org/api",
+      browserURL: "https://sonicscan.org",
       },
     },
   ],
- };
+ },
+ mocha: {
+    timeout: 40000,
+  },
+};
