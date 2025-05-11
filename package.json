@@ -36,6 +36,12 @@
     "deploy": "npx hardhat run scripts/deploy.js --network sonic"
   }
 }
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deployPaymasterFunder.js --network sonic",
+    "fund": "hardhat run scripts/fundPaymasterFunder.js --network sonic"
+  }
+}
 
 "scripts": {
   "test": "jest"
