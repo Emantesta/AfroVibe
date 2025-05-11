@@ -93,6 +93,20 @@ const Paymaster = () => {
       setIsLoading(false);
     }
   };
+  const [newMaxFunding, setNewMaxFunding] = useState("");
+  const handleInitiateMaxFunding = async () => {
+  if (!funder || !isAdmin || !newMaxFunding) return;
+  setIsLoading(true);
+  try {
+    const amount = ethers.utils.parseEther(newMaxFunding);
+    const receipt = await funder.initiateUpdateMaxFundingAmount(amount);
+    console.log("Max funding update initiated:", receipt);
+  } catch (error) {
+    setError(error.message || "Failed to initiate");
+  } finally {
+    setIsLoading(false);
+  }
+  }; 
 
   const handleFund = async () => {
     if (!funder || !isFunder || !fundingAmount || isPaused) return;
@@ -160,6 +174,20 @@ const Paymaster = () => {
         </p>
       )}
 
+      {isAdmin && (
+        <div>
+         <input
+           type="number"
+           value={newMaxFunding}
+           onChange={(e) => setNewMaxFunding(e.target.value)}
+           placeholder="New Max Funding Amount"
+      />
+      <button onClick={handleInitiateMaxFunding} disabled={isLoading}>
+      {isLoading ? "Initiating..." : "Initiate Max Funding Update"}
+    </button>
+  </div>
+)};
+       
       {isAdmin && (
         <div>
           <h2>Admin Controls</h2>
